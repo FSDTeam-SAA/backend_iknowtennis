@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import { isValidEmail } from "../utils/email.validators";
 import { AppError } from "../utils/AppError";
 import { User } from "../models/user.model";
+import { sendEmail } from "../utils/sendEmail";
 
 interface AuthenticatedRequest extends Request {
   user?: {
@@ -59,7 +60,7 @@ export const signupUser = async (
 };
 
 // login user
-// POST /api/v1/login
+// POST /api/v1/auth/login
 export const loginUser = async (
   req: Request,
   res: Response,
@@ -103,8 +104,176 @@ export const loginUser = async (
   }
 };
 
+// forgot password
+// POST /api/v1/auth/forgot-password
+export const forgotPassword = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) throw new AppError("Email is required", 400);
+
+    const user = await User.findOne({ email });
+    if (!user) throw new AppError("User not found", 404);
+
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
+    user.otp = otp;
+    user.otpExpire = new Date(Date.now() + 10 * 60 * 1000);
+    await user.save();
+
+    const htmlContent = `
+      <div style="font-family: Arial; padding: 20px;">
+        <h2>Password Reset OTP</h2>
+        <p>Your OTP for resetting your password is:</p>
+        <h1 style="text-align:center; letter-spacing: 5px;">${otp}</h1>
+        <p>This OTP will expire in 10 minutes.</p>
+        <p>If you did not request this, please ignore this email.</p>
+      </div>
+    `;
+
+    await sendEmail(user.email, "Your Password Reset OTP", htmlContent);
+
+    return res.status(200).json({
+      status: true,
+      statusCode: 200,
+      message: "OTP sent to email",
+      data: null,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// resend otp
+// POST /api/v1/auth/resend-otp
+export const resendOtp = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) throw new AppError("Email is required", 400);
+
+    const user = await User.findOne({ email });
+    if (!user) throw new AppError("User not found", 404);
+
+    if (user.otpExpire && user.otpExpire > new Date()) {
+      const remaining = Math.ceil(
+        (user.otpExpire.getTime() - Date.now()) / 1000
+      );
+      return res.status(429).json({
+        status: false,
+        statusCode: 429,
+        message: `Please wait ${remaining} seconds before requesting another OTP`,
+        data: null,
+      });
+    }
+
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
+    user.otp = otp;
+    user.otpExpire = new Date(Date.now() + 10 * 60 * 1000);
+
+    const htmlContent = `
+      <div style="font-family: Arial; padding: 20px;">
+        <h2>Your New OTP</h2>
+        <p>Use the new OTP below to verify your account:</p>
+        <h1 style="text-align:center; letter-spacing: 5px;">${otp}</h1>
+        <p>The OTP expires in 10 minutes.</p>
+      </div>
+    `;
+
+    await sendEmail(user.email, "Your New OTP", htmlContent);
+
+    const token = {
+      accessToken: user.generateAccessToken(),
+      refreshToken: user.generateRefreshToken(),
+    };
+    user.refreshToken = token.refreshToken;
+    user.save();
+
+    return res.status(200).json({
+      status: true,
+      statusCode: 200,
+      message: "OTP re-sent successfully",
+      data: [user, token],
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// verify otp
+// POST /api/v1/auth/verify-otp
+export const verifyOtp = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { email, otp } = req.body;
+
+    if (!email || !otp) throw new AppError("Email and OTP required", 400);
+
+    const user = await User.findOne({ email });
+    if (!user) throw new AppError("User not found", 404);
+
+    if (user.otp !== otp) throw new AppError("Invalid OTP", 400);
+    if (user.otpExpire && user.otpExpire < new Date())
+      throw new AppError("OTP expired", 400);
+
+    return res.status(200).json({
+      status: true,
+      statusCode: 200,
+      message: "OTP verified successfully",
+      data: null,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// reset password
+// POST /api/v1/auth/reset-password
+export const resetPassword = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { email, password, confirmPassword } = req.body;
+
+    if (!email || !password || !confirmPassword)
+      throw new AppError("All fields are required", 400);
+
+    if (password !== confirmPassword)
+      throw new AppError("Passwords must match", 400);
+
+    const user = await User.findOne({ email });
+    if (!user) throw new AppError("User not found", 404);
+
+    if (!user.otp || !user.otpExpire || user.otpExpire < new Date()) {
+      throw new AppError("OTP expired or not verified", 400);
+    }
+
+    user.password = password;
+    user.otp = undefined;
+    user.otpExpire = undefined;
+
+    await user.save();
+    return res.status(200).json({
+      status: true,
+      message: "Password reset successfully",
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 // logour user
-// POST /api/v1/logout
+// POST /api/v1/auth/logout
 export const logoutUser = async (
   req: AuthenticatedRequest,
   res: Response,
@@ -134,3 +303,5 @@ export const logoutUser = async (
     next(error);
   }
 };
+
+//

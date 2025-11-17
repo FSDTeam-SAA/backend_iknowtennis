@@ -8,3 +8,7 @@ export const dbURI: string =
 
 export const accessSecret: string = process.env.ACCESS_SECRET ?? "";
 export const refreshSecret: string = process.env.REFRESH_SECRET ?? "";
+
+export const smtpHost: string = process.env.SMTP_HOST ?? "gmail";
+export const smtpUser: string = process.env.SMTP_USER || "";
+export const smtpPass: string = process.env.SMTP_PASS || "";
