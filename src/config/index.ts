@@ -12,3 +12,9 @@ export const refreshSecret: string = process.env.REFRESH_SECRET ?? "";
 export const smtpHost: string = process.env.SMTP_HOST ?? "gmail";
 export const smtpUser: string = process.env.SMTP_USER || "";
 export const smtpPass: string = process.env.SMTP_PASS || "";
+
+export const cloudinaryCloudName: string =
+  process.env.CLOUDINARY_CLOUD_NAME || "";
+export const cloudinaryApiKey: string = process.env.CLOUDINARY_API_KEY || "";
+export const cloudinaryApiSecret: string =
+  process.env.CLOUDINARY_API_SECRET || "";

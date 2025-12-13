@@ -2,6 +2,7 @@ import express, { Request, Response } from "express";
 import cors from "cors";
 import { errorHandler } from "./middlewares/error.handler";
 import authRouter from "./routes/auth.routes";
+import quizCategoryRouter from "./routes/quizCategory.routes";
 
 const app = express();
 
@@ -18,6 +19,9 @@ app.get("/", (req: Request, res: Response) => {
 
 // auth routes
 app.use("/api/v1/auth", authRouter);
+
+// quiz category routes
+app.use("/api/v1/quiz-categories", quizCategoryRouter);
 
 // global error handler
 app.use(errorHandler);
