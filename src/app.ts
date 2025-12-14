@@ -3,6 +3,7 @@ import cors from "cors";
 import { errorHandler } from "./middlewares/error.handler";
 import authRouter from "./routes/auth.routes";
 import quizCategoryRouter from "./routes/quizCategory.routes";
+import subscriptionPlanRouter from "./routes/subscription.routes";
 
 const app = express();
 
@@ -22,6 +23,9 @@ app.use("/api/v1/auth", authRouter);
 
 // quiz category routes
 app.use("/api/v1/quiz-categories", quizCategoryRouter);
+
+// subscription plan routes
+app.use("/api/v1/subscription-plan", subscriptionPlanRouter);
 
 // global error handler
 app.use(errorHandler);
