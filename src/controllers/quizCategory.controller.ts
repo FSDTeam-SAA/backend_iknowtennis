@@ -17,9 +17,10 @@ export const createQuizCategory = async (
       quizCategoryState,
       quizPoint,
       quizCategoryDetails,
+      quizTotalTime,
     } = req.body;
 
-    if (!quizCategoryName || !quizCategoryDetails)
+    if (!quizCategoryName || !quizCategoryDetails || !quizTotalTime)
       throw new AppError("Required fields are missing", 400);
 
     if (!req.file) throw new AppError("Quiz category image is required", 400);
@@ -31,6 +32,7 @@ export const createQuizCategory = async (
       quizCount,
       quizCategoryState,
       quizPoint,
+      quizTotalTime,
       quizCategoryDetails,
       quizCategoryImage: url,
       quizCategoryImageId: publicId,
@@ -78,6 +80,8 @@ export const updateQuizCategory = async (
     quizCategory.quizPoint = req.body.quizPoint ?? quizCategory.quizPoint;
     quizCategory.quizCategoryDetails =
       req.body.quizCategoryDetails ?? quizCategory.quizCategoryDetails;
+    quizCategory.quizTotalTime =
+      req.body.quizTotalTime ?? quizCategory.quizTotalTime;
 
     await quizCategory.save();
 

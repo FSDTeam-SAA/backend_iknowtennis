@@ -4,6 +4,7 @@ import { errorHandler } from "./middlewares/error.handler";
 import authRouter from "./routes/auth.routes";
 import quizCategoryRouter from "./routes/quizCategory.routes";
 import subscriptionPlanRouter from "./routes/subscription.routes";
+import quizRouter from "./routes/quiz.routes";
 
 const app = express();
 
@@ -26,6 +27,9 @@ app.use("/api/v1/quiz-categories", quizCategoryRouter);
 
 // subscription plan routes
 app.use("/api/v1/subscription-plan", subscriptionPlanRouter);
+
+// quiz routes
+app.use("/api/v1/quiz", quizRouter);
 
 // global error handler
 app.use(errorHandler);

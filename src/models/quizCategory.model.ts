@@ -8,6 +8,8 @@ export interface IQuizCategory extends mongoose.Document {
   quizCategoryState: string;
   quizPoint: number;
   quizCategoryDetails: string;
+  quizTotalTime: number;
+  quizzes: mongoose.Types.ObjectId[];
 }
 
 const quizCategorySchema = new mongoose.Schema<IQuizCategory>(
@@ -39,6 +41,16 @@ const quizCategorySchema = new mongoose.Schema<IQuizCategory>(
       type: String,
       required: true,
     },
+    quizTotalTime: {
+      type: Number,
+      required: true,
+    },
+    quizzes: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Quiz",
+      },
+    ],
   },
   { timestamps: true }
 );
