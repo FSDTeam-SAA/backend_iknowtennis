@@ -89,14 +89,16 @@ export const loginUser = async (
       status: true,
       statusCode: 200,
       message: "Login successful",
-      accessToken,
-      refreshToken,
       data: {
         _id: user._id,
         fullName: user.fullName,
         email: user.email,
         avatar: user.avatar || null,
         role: user.role,
+        token:{
+          accessToken: accessToken,
+          refreshToken: refreshToken
+        }
       },
     });
   } catch (error) {
