@@ -18,3 +18,5 @@ export const cloudinaryCloudName: string =
 export const cloudinaryApiKey: string = process.env.CLOUDINARY_API_KEY || "";
 export const cloudinaryApiSecret: string =
   process.env.CLOUDINARY_API_SECRET || "";
+
+export const redisUrl = process.env.REDIS_URL || "redis://localhost:6379";

@@ -6,6 +6,7 @@ import quizCategoryRouter from "./routes/quizCategory.routes";
 import subscriptionPlanRouter from "./routes/subscription.routes";
 import quizRouter from "./routes/quiz.routes";
 import userRoouter from "./routes/user.routes";
+import playQuizRouter from "./routes/playQuiz.routes";
 
 const app = express();
 
@@ -34,6 +35,9 @@ app.use("/api/v1/quiz", quizRouter);
 
 // user routes
 app.use("/api/v1/user", userRoouter);
+
+// play quiz routes
+app.use("/api/v1/play-quiz", playQuizRouter);
 
 // global error handler
 app.use(errorHandler);
