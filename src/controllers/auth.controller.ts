@@ -95,10 +95,10 @@ export const loginUser = async (
         email: user.email,
         avatar: user.avatar || null,
         role: user.role,
-        token:{
+        token: {
           accessToken: accessToken,
-          refreshToken: refreshToken
-        }
+          refreshToken: refreshToken,
+        },
       },
     });
   } catch (error) {
@@ -243,7 +243,11 @@ export const verifyOtp = async (
 
 // reset password
 // POST /api/v1/auth/reset-password
-export const resetPassword = async (req: Request, res: Response, next: NextFunction) => {
+export const resetPassword = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
     const { email, password, confirmPassword } = req.body;
 
@@ -306,4 +310,51 @@ export const logoutUser = async (
   }
 };
 
-//
+// change password
+export const changePassword = async (
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { currentPassword, newPassword, confirmPassword } = req.body;
+
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      throw new AppError("All fields are required", 400);
+    }
+
+    if (newPassword !== confirmPassword) {
+      throw new AppError("New password and confirm password must match", 400);
+    }
+
+    if (currentPassword === newPassword) {
+      throw new AppError(
+        "New password must be different from current password",
+        400
+      );
+    }
+
+    const user = await User.findById(req.user?._id);
+    if (!user) {
+      throw new AppError("User not found", 404);
+    }
+
+    const isMatch = await user.comparePassword(currentPassword);
+    if (!isMatch) {
+      throw new AppError("Current password is incorrect", 401);
+    }
+
+    user.password = newPassword;
+    user.refreshToken = undefined;
+
+    await user.save();
+
+    return res.status(200).json({
+      status: true,
+      statusCode: 200,
+      message: "Password changed successfully. Please login again.",
+    });
+  } catch (error) {
+    next(error);
+  }
+};

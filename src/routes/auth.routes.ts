@@ -1,5 +1,6 @@
 import express from "express";
 import {
+  changePassword,
   forgotPassword,
   loginUser,
   logoutUser,
@@ -18,6 +19,7 @@ router.route("/forgot-password").post(forgotPassword);
 router.route("/resend-otp").post(resendOtp);
 router.route("/verify-otp").post(verifyOtp);
 router.route("/reset-password").post(resetPassword);
+router.route("/change-password").patch(isLoggedIn, changePassword);
 router.route("/logout").post(isLoggedIn, logoutUser);
 
 export default router;
