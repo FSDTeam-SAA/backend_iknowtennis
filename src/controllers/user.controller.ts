@@ -21,6 +21,8 @@ export const updateUserProfile = async (
       user.fullName = fullName.trim();
     }
 
+    user.fullName = fullName
+
     if (req.file) {
       if (user.avatarPublicId) {
         await cloudinaryDelete(user.avatarPublicId);
