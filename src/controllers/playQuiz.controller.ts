@@ -59,13 +59,14 @@ export const startQuiz = async (
       status: true,
       statusCode: 200,
       message: "Category and qustions fetched successfully",
+      data:{
       category: {
         id: category._id,
         name: category.quizCategoryName,
         totalTime: category.quizTotalTime,
         totalQuestions: questions.length,
       },
-      questions,
+      questions},
     };
 
     if (redisClient.isOpen) {
@@ -135,9 +136,10 @@ export const submitQuiz = async (
       status: true,
       statusCode: 201,
       message: "Quiz submitted successfully",
+      data:{
       attemptId: attempt._id,
       totalScore,
-      correctAnswers,
+      correctAnswers,}
     });
   } catch (error) {
     next(error);
@@ -164,7 +166,7 @@ export const getQuizResult = async (
       status: true,
       statusCode: 200,
       message: "Fetch quiz result successfully",
-      result,
+      data: result,
     });
   } catch (error) {
     next(error);
