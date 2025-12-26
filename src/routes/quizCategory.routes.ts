@@ -7,17 +7,19 @@ import {
   updateQuizCategory,
 } from "../controllers/quizCategory.controller";
 import { uploadSingle } from "../utils/upload";
+import { isLoggedIn } from "../middlewares/isLoggedIn";
+import { canAccessQuizCategory } from "../middlewares/canAccessQuizCategory.middleware";
 
 const router = express.Router();
 
 router
   .route("/")
-  .post(uploadSingle("quizCategoryImage"), createQuizCategory)
+  .post(isLoggedIn, uploadSingle("quizCategoryImage"), createQuizCategory)
   .get(getAllQuizCategories);
 router
   .route("/:id")
-  .put(uploadSingle("quizCategoryImage"), updateQuizCategory)
-  .get(getSingleQuizCategory)
+  .put(isLoggedIn, uploadSingle("quizCategoryImage"), updateQuizCategory)
+  .get(isLoggedIn, canAccessQuizCategory, getSingleQuizCategory)
   .delete(deleteQuizCategory);
 
 export default router;

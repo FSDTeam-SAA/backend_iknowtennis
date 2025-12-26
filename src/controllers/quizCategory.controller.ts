@@ -3,6 +3,7 @@ import QuizCategory from "../models/quizCategory.model";
 import { AppError } from "../utils/AppError";
 import cloudinaryUpload from "../utils/cloudinaryUpload";
 import cloudinaryDelete from "../utils/cloudinaryDelete";
+import mongoose from "mongoose";
 
 // create quiz category
 export const createQuizCategory = async (
@@ -153,6 +154,29 @@ export const getAllQuizCategories = async (
 };
 
 // get single quiz category
+// export const getSingleQuizCategory = async (
+//   req: Request,
+//   res: Response,
+//   next: NextFunction
+// ) => {
+//   try {
+//     const { id } = req.params;
+
+//     const quizCategory = await QuizCategory.findById(id);
+
+//     if (!quizCategory) throw new AppError("Quiz category not found", 404);
+
+//     return res.status(200).json({
+//       status: true,
+//       statusCode: 200,
+//       message: "Quiz category fetched successfully",
+//       data: quizCategory,
+//     });
+//   } catch (error) {
+//     next(error);
+//   }
+// };
+
 export const getSingleQuizCategory = async (
   req: Request,
   res: Response,
@@ -161,9 +185,20 @@ export const getSingleQuizCategory = async (
   try {
     const { id } = req.params;
 
-    const quizCategory = await QuizCategory.findById(id);
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      throw new AppError("Invalid quiz category id", 400);
+    }
 
-    if (!quizCategory) throw new AppError("Quiz category not found", 404);
+    const quizCategory = await QuizCategory.findById(id)
+      .populate({
+        path: "quizzes",
+        select: "quizQuestion quizPoint quizTime",
+      })
+      .lean();
+
+    if (!quizCategory) {
+      throw new AppError("Quiz category not found", 404);
+    }
 
     return res.status(200).json({
       status: true,

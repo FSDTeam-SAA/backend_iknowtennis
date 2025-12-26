@@ -7,6 +7,8 @@ import {
   startQuiz,
   submitQuiz,
 } from "../controllers/playQuiz.controller";
+import { hasActiveSubscription } from "../middlewares/hasActiveSubscription.middleware";
+import { canAccessQuizCategory } from "../middlewares/canAccessQuizCategory.middleware";
 
 const router = Router();
 
@@ -20,6 +22,11 @@ router.get("/result/:attemptId", getQuizResult);
 
 router.post("/submit", submitQuiz);
 
-router.get("/category/:categoryId", startQuiz);
+router.get(
+  "/category/:categoryId",
+  hasActiveSubscription,
+  canAccessQuizCategory,
+  startQuiz
+);
 
 export default router;

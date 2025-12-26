@@ -6,6 +6,11 @@ import {
   getSingleSubscriptionPlan,
   updateSubscriptionPlan,
 } from "../controllers/subscription.controller";
+import { isLoggedIn } from "../middlewares/isLoggedIn";
+import {
+  activateSubscription,
+  createSubscriptionCheckout,
+} from "../controllers/subscriptionPurchase.controller";
 
 const router = express.Router();
 
@@ -16,5 +21,9 @@ router
   .put(updateSubscriptionPlan)
   .get(getSingleSubscriptionPlan)
   .delete(deleteSubscriptionPlan);
+
+router.post("/activate", isLoggedIn, activateSubscription);
+
+router.route("/checkout").post(createSubscriptionCheckout);
 
 export default router;

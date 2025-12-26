@@ -1,10 +1,11 @@
-import mongoose from "mongoose";
+import mongoose, { Types } from "mongoose";
 
 export interface ISubscriptionPlan extends mongoose.Document {
   subscriptionPlanName: string;
   subscriptionMonthlyPlanPrice: number;
   subscriptionYearlyPlanPrice: number;
   subscriptionDetailsList: string[];
+  allowedQuizCategories: Types.ObjectId[];
 }
 
 const subscriptionPlanSchema = new mongoose.Schema<ISubscriptionPlan>(
@@ -26,6 +27,12 @@ const subscriptionPlanSchema = new mongoose.Schema<ISubscriptionPlan>(
       type: [String],
       required: true,
     },
+    allowedQuizCategories: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "QuizCategory",
+      },
+    ],
   },
   { timestamps: true }
 );

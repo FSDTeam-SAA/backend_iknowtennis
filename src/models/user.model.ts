@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { accessSecret, refreshSecret } from "../config/index";
+import { ISubscriptionPlan } from "./subscription.model";
 
 export interface IUser extends mongoose.Document {
   fullName: string;
@@ -17,6 +18,11 @@ export interface IUser extends mongoose.Document {
   comparePassword(candidatePassword: string): Promise<boolean>;
   generateAccessToken(): string;
   generateRefreshToken(): string;
+  subscription?: {
+    plan?: mongoose.Types.ObjectId | ISubscriptionPlan;
+    expiresAt?: Date;
+    isActive?: boolean;
+  };
 }
 
 export interface IUserModelStatic extends mongoose.Model<IUser> {
@@ -52,6 +58,17 @@ const userSchema = new mongoose.Schema<IUser>(
     otp: { type: String },
     otpExpire: { type: Date },
     refreshToken: { type: String },
+    subscription: {
+      plan: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "SubscriptionPlan",
+      },
+      expiresAt: Date,
+      isActive: {
+        type: Boolean,
+        default: false,
+      },
+    },
   },
   { timestamps: true }
 );

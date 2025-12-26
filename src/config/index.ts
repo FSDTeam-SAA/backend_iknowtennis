@@ -20,3 +20,5 @@ export const cloudinaryApiSecret: string =
   process.env.CLOUDINARY_API_SECRET || "";
 
 export const redisUrl = process.env.REDIS_URL || "redis://localhost:6379";
+
+export const stripeSecretKey = process.env.STRIPE_SECRET_KEY;

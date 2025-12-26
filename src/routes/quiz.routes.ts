@@ -7,13 +7,21 @@ import {
   getSingleQuiz,
   updateQuiz,
 } from "../controllers/quiz.controller";
+import { isLoggedIn } from "../middlewares/isLoggedIn";
+import { canAccessQuizCategory } from "../middlewares/canAccessQuizCategory.middleware";
 
 const router = express.Router();
 
-router.route("/").post(createQuiz).get(getAllQuizzes);
+router.route("/").post(isLoggedIn, createQuiz).get(getAllQuizzes);
 
-router.route("/:id").put(updateQuiz).get(getSingleQuiz).delete(deleteQuiz);
+router
+  .route("/:id")
+  .put(isLoggedIn, updateQuiz)
+  .get(isLoggedIn, canAccessQuizCategory, getSingleQuiz)
+  .delete(isLoggedIn, deleteQuiz);
 
-router.route("/:categoryName").get(getQuizzesByCategoryName);
+router
+  .route("/:categoryName")
+  .get(isLoggedIn, canAccessQuizCategory, getQuizzesByCategoryName);
 
 export default router;

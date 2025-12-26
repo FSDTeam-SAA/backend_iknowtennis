@@ -14,6 +14,7 @@ export const createSubscriptionPlan = async (
       subscriptionMonthlyPlanPrice,
       subscriptionYearlyPlanPrice,
       subscriptionDetailsList,
+      allowedQuizCategories,
     } = req.body;
 
     if (
@@ -38,6 +39,7 @@ export const createSubscriptionPlan = async (
       subscriptionMonthlyPlanPrice,
       subscriptionYearlyPlanPrice,
       subscriptionDetailsList,
+      allowedQuizCategories,
     });
 
     return res.status(201).json({
