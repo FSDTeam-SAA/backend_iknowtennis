@@ -15,6 +15,7 @@ export interface IQuizAttempt extends Document {
   totalScore: number;
   correctAnswers: number;
   totalQuestions: number;
+  timeTakenSeconds?: number;
 }
 
 const quizAttemptSchema = new Schema<IQuizAttempt>(
@@ -37,6 +38,10 @@ const quizAttemptSchema = new Schema<IQuizAttempt>(
     totalScore: Number,
     correctAnswers: Number,
     totalQuestions: Number,
+    timeTakenSeconds: {
+      type: Number,
+      default: null,
+    },
   },
   { timestamps: true }
 );

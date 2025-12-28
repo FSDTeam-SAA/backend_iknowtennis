@@ -87,9 +87,10 @@ export const submitQuiz = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    const { categoryId, answers } = req.body as {
+    const { categoryId, answers, timeTakenSeconds } = req.body as {
       categoryId: string;
       answers: SubmitAnswerDTO[];
+      timeTakenSeconds?: number;
     };
 
     if (!categoryId || !answers?.length) {
@@ -129,6 +130,8 @@ export const submitQuiz = async (
       totalScore,
       correctAnswers,
       totalQuestions: resultAnswers.length,
+      timeTakenSeconds:
+        typeof timeTakenSeconds === "number" ? timeTakenSeconds : null,
     });
 
     await updateLeaderboardRealtime(req.user!._id.toString(), totalScore);
