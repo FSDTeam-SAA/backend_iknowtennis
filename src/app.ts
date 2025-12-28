@@ -8,6 +8,7 @@ import quizRouter from "./routes/quiz.routes";
 import userRoouter from "./routes/user.routes";
 import playQuizRouter from "./routes/playQuiz.routes";
 import quizStatsRouter from "./routes/quizStats.routes";
+import adminDashboardRouter from "./routes/dashboard.routes";
 
 const app = express();
 
@@ -42,6 +43,9 @@ app.use("/api/v1/play-quiz", playQuizRouter);
 
 // quiz attempt stats routes
 app.use("/api/v1/quiz-stats", quizStatsRouter);
+
+// admin dashboard routes
+app.use("/api/v1/dashboard", adminDashboardRouter);
 
 // global error handler
 app.use(errorHandler);
