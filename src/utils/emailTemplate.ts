@@ -1,78 +1,22 @@
-`<div style="background: linear-gradient(180deg, #0a2342, #0e3a66); padding: 40px 0; font-family: Arial, sans-serif;">
-  <table width="100%" cellpadding="0" cellspacing="0" style="max-width: 500px; margin: auto; background: rgba(255,255,255,0.05); border-radius: 14px; padding: 30px; backdrop-filter: blur(6px);">
-    <tr>
-      <td style="text-align: center;">
-        <img src="https://i.ibb.co/0Fz3yxp/tennis-icon.png" alt="Tennis Logo" width="80" style="margin-bottom: 15px;" />
-      </td>
-    </tr>
-
-    <tr>
-      <td style="color: #ffffff; text-align: center; font-size: 26px; font-weight: bold;">
-        I know Tennis
-      </td>
-    </tr>
-
-    <tr>
-      <td style="color: #d0d8e0; text-align: center; font-size: 18px; padding-top: 10px;">
-        Reset Password
-      </td>
-    </tr>
-
-    <tr>
-      <td style="color: #b9c4cf; text-align: center; font-size: 14px; padding: 10px 20px 30px;">
-        Enter this OTP to reset your password.
-      </td>
-    </tr>
-
-    <tr>
-      <td style="text-align: center;">
-        <div style="
-          background: #ffffff;
-          color: #0a2342;
-          font-size: 32px;
-          font-weight: bold;
-          letter-spacing: 10px;
-          padding: 12px 20px;
-          border-radius: 10px;
-          display: inline-block;
-          min-width: 200px;
-        ">
-          {{OTP}}
-        </div>
-      </td>
-    </tr>
-
-    <tr>
-      <td style="color: #ffffff; text-align: center; font-size: 12px; padding-top: 25px;">
-        This OTP expires in <b>10 minutes</b>.
-      </td>
-    </tr>
-
-    <tr>
-      <td style="color: #8ea4ba; text-align: center; font-size: 12px; padding-top: 20px;">
-        If you did not request this, please ignore this email.
-      </td>
-    </tr>
-
-    <tr>
-      <td style="text-align: center; padding-top: 30px;">
-        <a href="#" style="
-          background: #1e78ff;
-          color: #ffffff;
-          text-decoration: none;
-          padding: 14px 35px;
-          border-radius: 8px;
-          font-size: 14px;
-          font-weight: bold;
-          display: inline-block;
-        ">
-          Open App
-        </a>
-      </td>
-    </tr>
-  </table>
-
-  <p style="color: #6f8296; text-align: center; font-size: 11px; margin-top: 20px;">
-    © I know Tennis. All rights reserved.
-  </p>
-</div>`
+// email template
+export const generatePasswordResetEmail = (otp: string) => {
+  return `
+    <div style="font-family: 'Arial', sans-serif; max-width: 600px; margin: auto; padding: 20px; background-color: #1D3F75; border-radius: 8px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);">
+      <div style="text-align: center; margin-bottom: 20px;">
+        <img src="https://i.imgur.com/h4SQEqJ.png" alt="I Know Tennis" style="width: 120px; margin-bottom: 20px;" />
+      </div>
+      <div style="background-color: #009F80; padding: 40px; border-radius: 8px; color: white; text-align: center;">
+        <h2 style="font-size: 24px; font-weight: bold; margin: 0;">Reset Your Password</h2>
+        <p style="font-size: 16px; margin-top: 8px;">You requested to reset your password. Please use the OTP below to proceed.</p>
+        <h1 style="font-size: 40px; font-weight: bold; margin: 30px 0; letter-spacing: 5px; color: #FFDC5C;">${otp}</h1>
+        <p style="font-size: 16px;">This OTP will expire in 10 minutes.</p>
+      </div>
+      <div style="margin-top: 20px; text-align: center;">
+        <p style="font-size: 14px; color: #fff;">If you did not request this, please ignore this email.</p>
+      </div>
+      <div style="margin-top: 40px; text-align: center;">
+        <p style="font-size: 12px; color: #bbb;">i Know Tennis | All rights reserved</p>
+      </div>
+    </div>
+  `;
+};
