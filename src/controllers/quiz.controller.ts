@@ -10,65 +10,64 @@ export const createQuiz = async (
   next: NextFunction
 ) => {
   try {
-    const { quizCategory, quizQuestion, quizOptions, quizAnswer, quizPoint } =
-      req.body;
+    const { quizCategory, quizzes } = req.body;
 
-    if (!quizCategory || !quizQuestion || !quizOptions || !quizAnswer)
-      throw new AppError("Missing required fields", 400);
+    if (!quizCategory || !Array.isArray(quizzes) || quizzes.length === 0) {
+      throw new AppError("Missing required fields or quizzes array", 400);
+    }
 
     const category = await QuizCategory.findById(quizCategory);
     if (!category) throw new AppError("Quiz category not found", 404);
 
-    const quizCount = await Quiz.countDocuments({ quizCategory });
-    if (quizCount >= category.quizCount)
-      throw new AppError("Quiz count limit exceeded for this category", 400);
+    const validatedQuizzes = [];
 
-    const totalPoints = await Quiz.aggregate([
-      { $match: { quizCategory: category._id } },
-      { $group: { _id: null, sum: { $sum: "$quizPoint" } } },
-    ]);
+    for (const quiz of quizzes) {
+      const { quizQuestion, quizOptions, quizAnswer, quizPoint } = quiz;
 
-    const usedPoints = totalPoints[0]?.sum || 0;
-    if (usedPoints + quizPoint > category.quizPoint)
-      throw new AppError("Quiz point limit exceeded", 400);
+      if (!quizQuestion || !quizOptions || !quizAnswer) {
+        throw new AppError("Missing required fields in quiz", 400);
+      }
 
-    const quizQuestionExist = await Quiz.findOne({ quizQuestion });
-    if (quizQuestionExist) throw new AppError("Quiz already available", 400);
+      const existingQuiz = await Quiz.findOne({ quizQuestion, quizCategory });
+      if (existingQuiz) {
+        throw new AppError(
+          `Quiz question "${quizQuestion}" already exists`,
+          400
+        );
+      }
 
-    const quiz = await Quiz.create(req.body);
+      validatedQuizzes.push({
+        quizCategory: category._id,
+        quizQuestion,
+        quizOptions,
+        quizAnswer,
+        quizPoint: quizPoint || 0,
+        isActive: quiz.isActive !== undefined ? quiz.isActive : true,
+      });
+    }
 
-    await QuizCategory.findOneAndUpdate(
-      {
-        _id: quizCategory,
-        $expr: {
-          $and: [
-            { $lt: ["$currentQuizCount", "$quizCount"] },
-            {
-              $lte: [{ $add: ["$currentQuizPoints", quizPoint] }, "$quizPoint"],
-            },
-          ],
-        },
-      },
+    const createdQuizzes = await Quiz.insertMany(validatedQuizzes);
+
+    await QuizCategory.findByIdAndUpdate(
+      quizCategory,
       {
         $inc: {
-          currentQuizCount: 1,
-          currentQuizPoints: quizPoint,
+          currentQuizCount: createdQuizzes.length,
+          currentQuizPoints: createdQuizzes.reduce(
+            (acc, q) => acc + q.quizPoint,
+            0
+          ),
         },
-        $push: { quizzes: quiz._id },
+        $push: { quizzes: { $each: createdQuizzes.map((q) => q._id) } },
       },
       { new: true }
     );
 
-    if (!category) {
-      await Quiz.findByIdAndDelete(quiz._id);
-      throw new AppError("Quiz limit exceeded", 400);
-    }
-
     return res.status(201).json({
       status: true,
       statusCode: 201,
-      message: "Quiz created successfully",
-      data: quiz,
+      message: `${createdQuizzes.length} quizzes created successfully`,
+      data: createdQuizzes,
     });
   } catch (err) {
     next(err);
