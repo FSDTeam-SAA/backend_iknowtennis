@@ -12,7 +12,7 @@ export const createSubscriptionPlan = async (
     const {
       subscriptionPlanName,
       subscriptionMonthlyPlanPrice,
-      subscriptionYearlyPlanPrice,
+      subscriptionYearlyPlanPrice, 
       subscriptionDetailsList,
       allowedQuizCategories,
     } = req.body;
@@ -80,6 +80,8 @@ export const updateSubscriptionPlan = async (
     subscriptionPlan.subscriptionDetailsList =
       req.body.subscriptionDetailsList ??
       subscriptionPlan.subscriptionDetailsList;
+
+    subscriptionPlan.allowedQuizCategories = req.body.allowedQuizCategories ?? subscriptionPlan.allowedQuizCategories
 
     await subscriptionPlan.save();
 
