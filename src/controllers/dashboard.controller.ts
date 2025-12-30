@@ -56,12 +56,40 @@ export const getAdminDashboardOverview = async (
   try {
     if (!req.user?._id) throw new AppError("Access Denied, Please login", 401);
 
+    const filter = req.query.filter || "weekly";
+
     const now = new Date();
-
     const last7Days = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
-
     const yearStart = new Date(now.getFullYear(), 0, 1);
     const yearEnd = new Date(now.getFullYear() + 1, 0, 1);
+
+    let dateRangeStart: Date, dateRangeEnd: Date;
+
+    switch (filter) {
+      case "daily":
+        dateRangeStart = new Date(now.setHours(0, 0, 0, 0));
+        dateRangeEnd = new Date(now.setHours(23, 59, 59, 999));
+        break;
+
+      case "weekly":
+        dateRangeStart = new Date(now.setDate(now.getDate() - now.getDay()));
+        dateRangeEnd = new Date(now.setDate(now.getDate() + 6));
+        break;
+
+      case "monthly":
+        dateRangeStart = new Date(now.getFullYear(), now.getMonth(), 1);
+        dateRangeEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+        break;
+
+      case "yearly":
+        dateRangeStart = yearStart;
+        dateRangeEnd = yearEnd;
+        break;
+
+      default:
+        dateRangeStart = last7Days;
+        dateRangeEnd = now;
+    }
 
     const totalUsersPromise = User.countDocuments();
 
@@ -158,14 +186,14 @@ export const getAdminDashboardOverview = async (
     ]);
 
     const quizAttendancePromise = QuizAttempt.aggregate([
-      { $match: { createdAt: { $gte: last7Days, $lte: now } } },
+      { $match: { createdAt: { $gte: dateRangeStart, $lte: dateRangeEnd } } },
       { $project: { dow: { $dayOfWeek: "$createdAt" } } },
       { $group: { _id: "$dow", count: { $sum: 1 } } },
       { $sort: { _id: 1 } },
     ]);
 
     const userJoiningPromise = User.aggregate([
-      { $match: { createdAt: { $gte: yearStart, $lt: yearEnd } } },
+      { $match: { createdAt: { $gte: dateRangeStart, $lt: dateRangeEnd } } },
       { $project: { month: { $month: "$createdAt" } } },
       { $group: { _id: "$month", count: { $sum: 1 } } },
       { $sort: { _id: 1 } },
@@ -222,7 +250,7 @@ export const getAdminDashboardOverview = async (
         },
 
         quizAttendance: {
-          range: "last_7_days",
+          range: filter,
           byWeekday: buildWeekdayArray(attendanceRows as any),
         },
 
