@@ -339,9 +339,9 @@ export const getLeaderboardSummary = async (
       0
     );
 
-    const completedPercent = safePercent(
-      categoriesPlayed,
-      totalCategoriesAvailable || categoriesPlayed || 1
+    const completedPercent = Math.min(
+      100,
+      (categoriesPlayed / totalCategoriesAvailable) * 100 || 0
     );
     const pendingPercent = 100 - completedPercent;
 
