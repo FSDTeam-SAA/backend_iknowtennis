@@ -3,6 +3,7 @@ import { isValidEmail } from "../utils/email.validators";
 import { AppError } from "../utils/AppError";
 import { User } from "../models/user.model";
 import { sendEmail } from "../utils/sendEmail";
+import { generatePasswordResetEmail } from "../utils/emailTemplate";
 
 interface AuthenticatedRequest extends Request {
   user?: {
@@ -127,15 +128,7 @@ export const forgotPassword = async (
     user.otpExpire = new Date(Date.now() + 10 * 60 * 1000);
     await user.save();
 
-    const htmlContent = `
-      <div style="font-family: Arial; padding: 20px;">
-        <h2>Password Reset OTP</h2>
-        <p>Your OTP for resetting your password is:</p>
-        <h1 style="text-align:center; letter-spacing: 5px;">${otp}</h1>
-        <p>This OTP will expire in 10 minutes.</p>
-        <p>If you did not request this, please ignore this email.</p>
-      </div>
-    `;
+    const htmlContent = generatePasswordResetEmail(otp);
 
     await sendEmail(user.email, "Your Password Reset OTP", htmlContent);
 
@@ -182,14 +175,7 @@ export const resendOtp = async (
     user.otp = otp;
     user.otpExpire = new Date(Date.now() + 10 * 60 * 1000);
 
-    const htmlContent = `
-      <div style="font-family: Arial; padding: 20px;">
-        <h2>Your New OTP</h2>
-        <p>Use the new OTP below to verify your account:</p>
-        <h1 style="text-align:center; letter-spacing: 5px;">${otp}</h1>
-        <p>The OTP expires in 10 minutes.</p>
-      </div>
-    `;
+    const htmlContent = generatePasswordResetEmail(otp);
 
     await sendEmail(user.email, "Your New OTP", htmlContent);
 
