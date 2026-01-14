@@ -7,6 +7,8 @@ import { AppError } from "../utils/AppError";
 import QuizCategory from "../models/quizCategory.model";
 import { updateLeaderboardRealtime } from "../services/leaderboard.service";
 import { User } from "../models/user.model";
+import { getRandomJoke } from "./joke.controller";
+import Joke from "../models/joke.model";
 
 interface SubmitAnswerDTO {
   questionId: string;
@@ -21,6 +23,17 @@ interface AuthenticatedRequest extends Request {
     role?: string;
   };
 }
+
+// get a random tennis joke
+const fetchRandomJoke = async () => {
+  try {
+    const joke = await Joke.aggregate([{ $sample: { size: 1 } }]);
+    if (!joke || joke.length === 0) throw new AppError("No jokes found", 404);
+    return joke[0];
+  } catch (error) {
+    throw new AppError("Error fetching random joke", 500);
+  }
+};
 
 // get quiz questions
 export const startQuiz = async (
@@ -169,7 +182,6 @@ export const submitQuiz = async (
     const isCorrect = question.quizAnswer === selectedOption;
     const point = isCorrect ? question.quizPoint : 0;
 
-    // Save the answer in the QuizAttempt collection (or another suitable collection)
     const answer = {
       questionId,
       selectedOption,
@@ -177,12 +189,14 @@ export const submitQuiz = async (
       point,
     };
 
-    // Create or update the quiz attempt entry for this single question answer
+    const totalQuestions = await Quiz.countDocuments({
+      quizCategory: categoryId,
+    });
+
     const attempt = await QuizAttempt.findOneAndUpdate(
       {
         user: req.user!._id,
         category: categoryId,
-        // Filter for the ongoing quiz attempt
       },
       {
         $push: { answers: answer },
@@ -190,18 +204,34 @@ export const submitQuiz = async (
           totalScore: point,
           correctAnswers: isCorrect ? 1 : 0,
         },
-        $set: { totalQuestions: 1 }, // Adjust the total questions for the current attempt
+        $set: { totalQuestions },
       },
       { upsert: true, new: true }
     );
 
-    // Update the leaderboard in Redis
     await updateLeaderboardRealtime(
       req.user!._id.toString(),
       attempt.totalScore
     );
 
-    // Return feedback for this question
+    const totalAnsweredQuestions = attempt.answers.length;
+
+    if (totalAnsweredQuestions === totalQuestions) {
+      const joke = await fetchRandomJoke();
+
+      res.status(200).json({
+        status: true,
+        message: "Answer submitted successfully, here's a joke:",
+        data: {
+          isCorrect,
+          correctAnswer: question.quizAnswer,
+          attemptId: attempt._id,
+          joke: joke.text,
+          jokeImageUrl: joke.imageUrl,
+        },
+      });
+    }
+
     res.status(200).json({
       status: true,
       message: "Answer submitted successfully",
