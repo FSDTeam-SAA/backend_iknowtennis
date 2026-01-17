@@ -14,12 +14,12 @@ const router = Router();
 
 router
   .route("/")
-  .post(isLoggedIn, isAdmin, uploadSingle("jokeImage"), uploadJoke)
+  .post(isLoggedIn, uploadSingle("jokeImage"), uploadJoke)
   .get(isLoggedIn, isAdmin, getAllJokes);
 
 router
   .route("/:id")
-  .put(isLoggedIn, isAdmin, uploadSingle("jokeImage"), editJoke)
+  .put(isLoggedIn, uploadSingle("jokeImage"), editJoke)
   .delete(isLoggedIn, isAdmin, deleteJoke);
 
 router.route("/random-joke").get(isLoggedIn, getRandomJoke);
