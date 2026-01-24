@@ -2,7 +2,6 @@ import mongoose from "mongoose";
 
 export interface IJoke extends mongoose.Document {
   text: string;
-  answer: string;
   imageUrl: string;
   createdAt: Date;
 }
@@ -10,11 +9,6 @@ export interface IJoke extends mongoose.Document {
 const jokeSchema = new mongoose.Schema<IJoke>(
   {
     text: {
-      type: String,
-      required: true,
-      trim: true,
-    },
-    answer: {
       type: String,
       required: true,
       trim: true,

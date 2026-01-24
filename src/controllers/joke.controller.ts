@@ -10,7 +10,7 @@ export const uploadJoke = async (
   next: NextFunction
 ) => {
   try {
-    const { text, answer } = req.body;
+    const { text } = req.body;
     const imageFile = req.file;
 
     if (!text || !imageFile) {
@@ -21,7 +21,6 @@ export const uploadJoke = async (
 
     const newJoke = await Joke.create({
       text,
-      answer,
       imageUrl,
     });
 
@@ -48,7 +47,6 @@ export const getRandomJoke = async (
     if (!joke || joke.length === 0) {
       return res.status(404).json({
         status: false,
-        statusCode: 404,
         message: "No jokes found in the database",
       });
     }
@@ -59,7 +57,6 @@ export const getRandomJoke = async (
       message: "Here is a joke for you!",
       data: {
         joke: joke[0].text,
-        answer: joke[0].answer,
         imageUrl: joke[0].imageUrl,
       },
     });
@@ -76,10 +73,10 @@ export const editJoke = async (
 ): Promise<void> => {
   try {
     const { id } = req.params;
-    const { text, answer, imageUrl } = req.body;
+    const { text, imageUrl } = req.body;
 
     if (!text) {
-      throw new AppError("Joke qustion and answer are required", 400);
+      throw new AppError("Joke text is required", 400);
     }
 
     const joke = await Joke.findById(id);
@@ -88,7 +85,6 @@ export const editJoke = async (
     }
 
     joke.text = text;
-    joke.answer = answer;
     if (imageUrl) {
       joke.imageUrl = imageUrl;
     }

@@ -27,9 +27,6 @@ const cloudinaryUpload = async (
       resource_type: "image",
     });
 
-    console.log(result.secure_url);
-    
-
     fs.unlinkSync(localFilePath);
 
     return {
