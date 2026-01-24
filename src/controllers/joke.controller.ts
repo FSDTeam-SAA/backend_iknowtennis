@@ -7,13 +7,14 @@ import cloudinaryUpload from "../utils/cloudinaryUpload";
 export const uploadJoke = async (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   try {
-    const { text } = req.body;
+    const { text, jokeAnswer } = req.body;
+    console.log(text, jokeAnswer);
     const imageFile = req.file;
 
-    if (!text || !imageFile) {
+    if (!text || !imageFile || !jokeAnswer) {
       throw new AppError("Both joke and image are required", 400);
     }
 
@@ -21,6 +22,7 @@ export const uploadJoke = async (
 
     const newJoke = await Joke.create({
       text,
+      jokeAnswer,
       imageUrl,
     });
 
@@ -39,7 +41,7 @@ export const uploadJoke = async (
 export const getRandomJoke = async (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   try {
     const joke = await Joke.aggregate([{ $sample: { size: 1 } }]);
@@ -69,11 +71,11 @@ export const getRandomJoke = async (
 export const editJoke = async (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ): Promise<void> => {
   try {
     const { id } = req.params;
-    const { text, imageUrl } = req.body;
+    const { text, jokeAnswer, imageUrl } = req.body;
 
     if (!text) {
       throw new AppError("Joke text is required", 400);
@@ -85,6 +87,7 @@ export const editJoke = async (
     }
 
     joke.text = text;
+    joke.jokeAnswer = jokeAnswer;
     if (imageUrl) {
       joke.imageUrl = imageUrl;
     }
@@ -106,7 +109,7 @@ export const editJoke = async (
 export const deleteJoke = async (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ): Promise<void> => {
   try {
     const { id } = req.params;
@@ -133,7 +136,7 @@ export const deleteJoke = async (
 export const getAllJokes = async (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ): Promise<void> => {
   try {
     const page = Number(req.query.page) || 1;

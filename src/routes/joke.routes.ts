@@ -12,9 +12,13 @@ import { isAdmin } from "../middlewares/isAdmin";
 
 const router = Router();
 
+// router
+//   .route("/")
+//   .post(isLoggedIn, isAdmin, uploadSingle("jokeImage"), uploadJoke)
+//   .get(isLoggedIn, isAdmin, getAllJokes);
 router
   .route("/")
-  .post(isLoggedIn, isAdmin, uploadSingle("jokeImage"), uploadJoke)
+  .post(uploadSingle("jokeImage"), uploadJoke)
   .get(isLoggedIn, isAdmin, getAllJokes);
 
 router

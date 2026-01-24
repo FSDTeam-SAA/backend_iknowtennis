@@ -15,7 +15,7 @@ const User = UserModel as IUserModelStatic;
 export const isLoggedIn = async (
   req: AuthenticatedRequest,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   const authHeader = req.headers.authorization;
 
