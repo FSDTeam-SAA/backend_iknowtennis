@@ -3,8 +3,7 @@ import mongoose from "mongoose";
 import { AuthenticatedRequest } from "./isLoggedIn";
 import { User } from "../models/user.model";
 import { AppError } from "../utils/AppError";
-import { premiumPlanName } from "../config";
-import { ISubscriptionPlan } from "../models/subscription.model";
+import { FREE_QUIZ_CATEGORY_IDS } from "../config";
 
 export const canAccessQuizCategory = async (
   req: AuthenticatedRequest,
@@ -12,48 +11,40 @@ export const canAccessQuizCategory = async (
   next: NextFunction,
 ) => {
   try {
-    if (!req.user?._id) {
-      return next(new AppError("Access Denied, Please login", 401));
+    const { categoryId } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(categoryId)) {
+      throw new AppError("Invalid quiz category id", 400);
     }
 
-    const categoryId = req.params.categoryId || req.body.categoryId;
+    const user = await User.findById(req.user!._id).populate(
+      "subscription.plan",
+    );
 
-    if (!categoryId || !mongoose.Types.ObjectId.isValid(categoryId)) {
-      return next(new AppError("Invalid quiz category id", 400));
+    if (!user || !user.subscription || !user.subscription.isActive) {
+      throw new AppError("Subscription inactive", 403);
     }
 
-    const user = await User.findById(req.user._id)
-      .populate("subscription.plan")
-      .select("subscription")
-      .lean();
+    if (!user.subscription.expiresAt) {
+      const allowed = FREE_QUIZ_CATEGORY_IDS.includes(categoryId);
 
-    if (!user || !user.subscription || !user.subscription.plan) {
-      return next(new AppError("Subscription missing", 403));
-    }
+      if (!allowed) {
+        throw new AppError(
+          "This quiz category is locked. Upgrade to premium.",
+          403,
+        );
+      }
 
-    const plan = user.subscription.plan as unknown as ISubscriptionPlan;
-
-    if (
-      plan?.subscriptionPlanName &&
-      String(plan.subscriptionPlanName).toUpperCase() ===
-        String(premiumPlanName).toUpperCase()
-    ) {
       return next();
     }
 
-    const allowed = (plan.allowedQuizCategories || []).map((id: any) =>
-      String(id),
-    );
-
-    const isAllowed = allowed.includes(String(categoryId));
-    if (!isAllowed) {
-      return next(
-        new AppError("This category is locked. Please upgrade.", 403),
-      );
+    if (user.subscription.expiresAt < new Date()) {
+      throw new AppError("Subscription expired", 403);
     }
 
+    // Premium users can access everything
     return next();
-  } catch (err) {
-    next(err);
+  } catch (error) {
+    next(error);
   }
 };

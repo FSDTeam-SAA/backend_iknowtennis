@@ -22,6 +22,11 @@ export const cloudinaryApiSecret: string =
 export const freePlanId = process.env.FREE_PLAN_ID as string;
 export const premiumPlanName = process.env.PREMIUM_PLAN_NAME || "PREMIUM";
 
+export const FREE_QUIZ_CATEGORY_IDS = [
+  "69731620589b89268b652675",
+  "69731c21a2d964a2de632444",
+];
+
 export const redisUrl = process.env.REDIS_URL || "redis://localhost:6379";
 
 export const stripeSecretKey = process.env.STRIPE_SECRET_KEY;

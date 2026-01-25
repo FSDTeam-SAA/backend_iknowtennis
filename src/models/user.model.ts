@@ -63,14 +63,17 @@ const userSchema = new mongoose.Schema<IUser>(
         type: mongoose.Schema.Types.ObjectId,
         ref: "SubscriptionPlan",
       },
-      expiresAt: Date,
+      expiresAt: {
+        type: Date,
+        default: null,
+      },
       isActive: {
         type: Boolean,
         default: false,
       },
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 // password hash
@@ -83,7 +86,7 @@ userSchema.pre("save", async function (next) {
 
 // compare password
 userSchema.methods.comparePassword = async function (
-  candidatePassword: string
+  candidatePassword: string,
 ) {
   return bcrypt.compare(candidatePassword, this.password);
 };
@@ -97,7 +100,7 @@ userSchema.methods.generateAccessToken = function () {
       role: this.role,
     },
     accessSecret,
-    { expiresIn: "3d" }
+    { expiresIn: "3d" },
   );
 };
 
@@ -108,7 +111,7 @@ userSchema.methods.generateRefreshToken = function () {
       id: this._id,
     },
     refreshSecret,
-    { expiresIn: "90d" }
+    { expiresIn: "90d" },
   );
 };
 
