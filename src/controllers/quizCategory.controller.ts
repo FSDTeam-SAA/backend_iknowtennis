@@ -4,12 +4,15 @@ import { AppError } from "../utils/AppError";
 import cloudinaryUpload from "../utils/cloudinaryUpload";
 import cloudinaryDelete from "../utils/cloudinaryDelete";
 import mongoose from "mongoose";
+import { AuthenticatedRequest } from "../middlewares/isLoggedIn";
+import { User } from "../models/user.model";
+import { FREE_QUIZ_CATEGORY_IDS } from "../config";
 
 // create quiz category
 export const createQuizCategory = async (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   try {
     const {
@@ -54,7 +57,7 @@ export const createQuizCategory = async (
 export const updateQuizCategory = async (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   try {
     const { id } = req.params;
@@ -98,10 +101,64 @@ export const updateQuizCategory = async (
 };
 
 // get all quiz categories
+// export const getAllQuizCategories = async (
+//   req: Request,
+//   res: Response,
+//   next: NextFunction
+// ) => {
+//   try {
+//     const page = Number(req.query.page) || 1;
+//     const limit = Number(req.query.limit) || 10;
+//     const skip = (page - 1) * limit;
+
+//     const { quizCategoryName, sortByPoint, sortByCount } = req.query;
+
+//     const filter: any = {};
+
+//     if (quizCategoryName) {
+//       filter.quizCategoryName = {
+//         $regex: quizCategoryName,
+//         $options: "i",
+//       };
+//     }
+
+//     const sort: any = {};
+
+//     if (sortByPoint === "high") sort.quizPoint = -1;
+//     if (sortByPoint === "low") sort.quizPoint = 1;
+
+//     if (sortByCount === "high") sort.quizCount = -1;
+//     if (sortByCount === "low") sort.quizCount = 1;
+
+//     if (Object.keys(sort).length === 0) {
+//       sort.createdAt = -1;
+//     }
+
+//     const [categories, total] = await Promise.all([
+//       QuizCategory.find(filter).sort(sort).skip(skip).limit(limit),
+//       QuizCategory.countDocuments(filter),
+//     ]);
+
+//     return res.status(200).json({
+//       status: true,
+//       statusCode: 200,
+//       message: "Quiz categories fetched successfully",
+//       data: categories,
+//       pagination: {
+//         total,
+//         page,
+//         limit,
+//         totalPages: Math.ceil(total / limit),
+//       },
+//     });
+//   } catch (error) {
+//     next(error);
+//   }
+// };
 export const getAllQuizCategories = async (
-  req: Request,
+  req: AuthenticatedRequest,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   try {
     const page = Number(req.query.page) || 1;
@@ -136,11 +193,38 @@ export const getAllQuizCategories = async (
       QuizCategory.countDocuments(filter),
     ]);
 
-    return res.status(200).json({
+    const user = await User.findById(req.user!._id);
+
+    const isFreeUser =
+      user?.subscription?.isActive === true &&
+      user.subscription.expiresAt === null;
+
+    const data = categories.map((category) => {
+      const categoryId = String(category._id);
+
+      let isLocked = false;
+
+      if (isFreeUser) {
+        isLocked = !FREE_QUIZ_CATEGORY_IDS.includes(categoryId);
+      }
+
+      return {
+        id: categoryId,
+        quizCategoryName: category.quizCategoryName,
+        quizCategoryImage: category.quizCategoryImage,
+        quizCategoryDetails: category.quizCategoryDetails,
+        quizTotalTime: category.quizTotalTime,
+        quizCount: category.quizCount,
+        quizPoint: category.quizPoint,
+        isLocked,
+      };
+    });
+
+    res.status(200).json({
       status: true,
       statusCode: 200,
       message: "Quiz categories fetched successfully",
-      data: categories,
+      data,
       pagination: {
         total,
         page,
@@ -180,7 +264,7 @@ export const getAllQuizCategories = async (
 export const getSingleQuizCategory = async (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   try {
     const { id } = req.params;
@@ -215,7 +299,7 @@ export const getSingleQuizCategory = async (
 export const deleteQuizCategory = async (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   try {
     const quizCategory = await QuizCategory.findById(req.params.id);

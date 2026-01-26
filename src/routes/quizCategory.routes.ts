@@ -19,16 +19,17 @@ router
     isLoggedIn,
     isAdmin,
     uploadSingle("quizCategoryImage"),
-    createQuizCategory
+    createQuizCategory,
   )
-  .get(getAllQuizCategories);
+  .get(isLoggedIn, getAllQuizCategories);
+
 router
   .route("/:id")
   .put(
     isLoggedIn,
     isAdmin,
     uploadSingle("quizCategoryImage"),
-    updateQuizCategory
+    updateQuizCategory,
   )
   .get(isLoggedIn, canAccessQuizCategory, getSingleQuizCategory)
   .delete(isLoggedIn, isAdmin, deleteQuizCategory);
