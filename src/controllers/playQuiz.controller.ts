@@ -94,6 +94,76 @@ export const startQuiz = async (
 };
 
 // submit quiz
+// export const submitQuiz = async (
+//   req: AuthenticatedRequest,
+//   res: Response,
+//   next: NextFunction,
+// ): Promise<void> => {
+//   try {
+//     const { categoryId, answers, timeTakenSeconds } = req.body as {
+//       categoryId: string;
+//       answers: SubmitAnswerDTO[];
+//       timeTakenSeconds?: number;
+//     };
+
+//     if (!categoryId || !answers?.length) {
+//       throw new AppError("Invalid submission data", 400);
+//     }
+
+//     let totalScore = 0;
+//     let correctAnswers = 0;
+
+//     const resultAnswers = [];
+
+//     for (const ans of answers) {
+//       const question = await Quiz.findById(ans.questionId);
+//       if (!question) continue;
+
+//       const isCorrect = question.quizAnswer === ans.selectedOption;
+//       const point = isCorrect ? question.quizPoint : 0;
+
+//       if (isCorrect) {
+//         totalScore += point;
+//         correctAnswers++;
+//       }
+
+//       resultAnswers.push({
+//         question: question._id,
+//         selectedOption: ans.selectedOption,
+//         correctOption: question.quizAnswer,
+//         isCorrect,
+//         point,
+//       });
+//     }
+
+//     const attempt = await QuizAttempt.create({
+//       user: req.user!._id,
+//       category: categoryId,
+//       answers: resultAnswers,
+//       totalScore,
+//       correctAnswers,
+//       totalQuestions: resultAnswers.length,
+//       timeTakenSeconds:
+//         typeof timeTakenSeconds === "number" ? timeTakenSeconds : null,
+//     });
+
+//     await updateLeaderboardRealtime(req.user!._id.toString(), totalScore);
+
+//     res.status(201).json({
+//       status: true,
+//       statusCode: 201,
+//       message: "Quiz submitted successfully",
+//       data: {
+//         attemptId: attempt._id,
+//         totalScore,
+//         correctAnswers,
+//       },
+//     });
+//   } catch (error) {
+//     next(error);
+//   }
+// };
+
 export const submitQuiz = async (
   req: AuthenticatedRequest,
   res: Response,

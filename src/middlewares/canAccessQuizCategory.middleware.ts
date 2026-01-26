@@ -11,9 +11,10 @@ export const canAccessQuizCategory = async (
   next: NextFunction,
 ) => {
   try {
-    const { categoryId } = req.params;
+    const categoryId =
+      req.params?.categoryId || req.body?.categoryId || req.query?.categoryId;
 
-    if (!mongoose.Types.ObjectId.isValid(categoryId)) {
+    if (!categoryId || !mongoose.Types.ObjectId.isValid(categoryId)) {
       throw new AppError("Invalid quiz category id", 400);
     }
 
@@ -42,7 +43,6 @@ export const canAccessQuizCategory = async (
       throw new AppError("Subscription expired", 403);
     }
 
-    // Premium users can access everything
     return next();
   } catch (error) {
     next(error);
