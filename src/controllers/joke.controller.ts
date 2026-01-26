@@ -59,6 +59,7 @@ export const getRandomJoke = async (
       message: "Here is a joke for you!",
       data: {
         joke: joke[0].text,
+        jokeAnswer: joke[0].jokeAnswer,
         imageUrl: joke[0].imageUrl,
       },
     });
