@@ -209,7 +209,7 @@ export const getAllQuizCategories = async (
       }
 
       return {
-        id: categoryId,
+        _id: categoryId,
         quizCategoryName: category.quizCategoryName,
         quizCategoryImage: category.quizCategoryImage,
         quizCategoryDetails: category.quizCategoryDetails,
